@@ -1,6 +1,7 @@
 const express = require("express");
 require("express-async-errors");
-requirerequire("dotenv").config();
+require("dotenv").config();
+const status = require("express-status-monitor");
 const connectDB = require("./db/connect");
 
 //env
@@ -16,6 +17,12 @@ app.use(express.json());
 //express url parsing middleware
 app.use(express.urlencoded({ extended: false }));
 
+app.use(
+  status({
+    path: "/api/v1/status",
+  })
+);
+
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "Hello from the server",
@@ -25,6 +32,13 @@ app.get("/", (req, res) => {
     url: req.originalUrl,
   });
 });
+
+const transactionsRouter = require("./routes/transactions");
+
+app.use("/api/v1/transactions", transactionsRouter);
+
+const globalErrorHandler = require("./middleware/globalErrorHandler");
+app.use(globalErrorHandler);
 
 //start server and connet to db
 const startServer = async () => {
